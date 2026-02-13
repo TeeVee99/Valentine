@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Valentine Quest ❤️</title>
+
+<style>
+body{
+  font-family:sans-serif;
+  text-align:center;
+  background:linear-gradient(135deg,#ff9ccf,#ffd6ec);
+  margin:0;
+  overflow-x:hidden;
+}
+
+.stage{display:none;padding:30px;}
+.stage.active{display:block;animation:fade .6s}
+@keyframes fade{from{opacity:0;transform:translateY(20px)}}
+
+button{
+  padding:12px 22px;
+  font-size:18px;
+  border:none;
+  border-radius:14px;
+  background:#ff4da6;
+  color:white;
+  cursor:pointer;
+  margin:10px;
+  transition:.2s;
+}
+button:hover{transform:scale(1.05)}
+
+input{
+  padding:14px;
+  font-size:18px;
+  border-radius:12px;
+  border:2px solid #ff4da6;
+  outline:none;
+  margin:10px;
+  text-align:center;
+  width:220px;
+}
+
+/* WORDLE */
+.wordle-grid{
+  display:grid;
+  grid-template-columns:repeat(5,64px);
+  gap:5px;
+  justify-content:center;
+  margin:15px;
+}
+.tile{
+  width:40px;height:40px;
+  border-radius:12px;
+  border:2px solid #333;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  font-weight:bold;
+  background:white;
+}
+.green{background:#6aaa64;color:white}
+.yellow{background:#c9b458;color:white}
+.gray{background:#787c7e;color:white}
+
+/* MONTH GRID */
+.monthBtn{
+  background:white;
+  color:#ff4da6;
+  border:2px solid #ff4da6;
+  font-size:16px;
+  padding:10px;
+  border-radius:12px;
+}
+
+.monthBtn.active{
+  background:#ff4da6;
+  color:white;
+  transform:scale(1.05);
+}
+
+
+/* PUZZLE */
+#puzzle{
+  width:360px;height:360px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:3px;
+}
+.piece{
+  background-image:url('valentine.jpeg');
+  background-size:360px 360px;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+#finalImage{
+  width:360px;
+  border-radius:16px;
+  display:none;
+  margin-top:20px;
+}
+
+/* BETTER CONFETTI */
+.confetti{
+  position:fixed;
+  top:-20px;
+  pointer-events:none;
+  animation:fall linear forwards;
+}
+
+.confetti.square{
+  width:10px;height:10px;
+}
+
+.confetti.circle{
+  width:10px;height:10px;
+  border-radius:50%;
+}
+
+.confetti.heart{
+  font-size:14px;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(720deg) translateX(var(--drift));
+    opacity:.9;
+  }
+}
+
+#noBtn{position:relative}
+.bigLove{
+  font-size:42px;
+  color:#ff2f92;
+  margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- START -->
+<div class="stage active" id="start">
+<h1>Valentine Quest ❤️</h1>
+<button onclick="show('wordle')">Start Game</button>
+</div>
+
+<!-- WORDLE -->
+<div class="stage" id="wordle">
+<h1>Wordle Stage</h1>
+<div class="wordle-grid" id="wg"></div>
+<input id="wordInput" maxlength="5">
+<br>
+<button onclick="guess()">Guess</button>
+</div>
+
+<!-- DOTA -->
+<div class="stage" id="dotaQ">
+<h1>Valentine Dota 🎮</h1>
+<p>If you are my carry, what am I?</p>
+<button onclick="dq(true)">Hard Support ❤️</button>
+<button onclick="dq(false)">Creep</button>
+<button onclick="dq(false)">Neutral Camp</button>
+</div>
+
+<!-- MONTH QUESTION -->
+<div class="stage" id="monthQ">
+    <h1>Memory Check 💞</h1>
+    <p>Select the months we DIDN'T meet last year</p>
+    
+    <div class="months">
+    <button class="monthBtn" onclick="toggleMonth(this,'jan')">January</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'feb')">February</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'mar')">March</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'apr')">April</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'may')">May</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'jun')">June</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'jul')">July</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'aug')">August</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'sep')">September</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'oct')">October</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'nov')">November</button>
+    <button class="monthBtn" onclick="toggleMonth(this,'dec')">December</button>
+    </div>
+    
+    <button onclick="checkMonths()">Submit</button>
+    </div>
+    
+
+<!-- FINAL TEXT -->
+<div class="stage" id="textQ">
+<h1>Final Question</h1>
+<p>How many places have we visited together last year? xP</p>
+<input id="finalAns">
+<br>
+<button onclick="checkFinal()">Submit</button>
+</div>
+
+<!-- PUZZLE -->
+<div class="stage" id="puzzleStage">
+<h1>Reveal Puzzle 💖</h1>
+<div id="puzzle"></div>
+<img id="finalImage" src="valentine.jpg">
+</div>
+
+<!-- PROPOSAL -->
+<div class="stage" id="proposal">
+<h1>Will you be my Valentine forever? 💘</h1>
+<button onclick="yesWin()">YES 💖</button>
+<button id="noBtn">NO 😈</button>
+</div>
+
+<!-- FINAL LOVE PAGE -->
+<div class="stage" id="lovePage">
+<h1 class="bigLove">Yayyyy, love you cutiloooo!! 💖</h1>
+</div>
+
+<script>
+function show(id){
+ document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'))
+ document.getElementById(id).classList.add('active')
+}
+
+/* WORDLE */
+const ans="HEART"
+let row=0
+function initWordle(){
+ const g=document.getElementById("wg")
+ for(let i=0;i<30;i++){
+   const d=document.createElement("div")
+   d.className="tile"
+   g.appendChild(d)
+ }
+}
+initWordle()
+
+function guess(){
+ const val=document.getElementById("wordInput").value.toUpperCase()
+ if(val.length!==5)return
+ for(let i=0;i<5;i++){
+   const t=document.querySelectorAll(".tile")[row*5+i]
+   t.textContent=val[i]
+   if(val[i]==ans[i]) t.classList.add("green")
+   else if(ans.includes(val[i])) t.classList.add("yellow")
+   else t.classList.add("gray")
+ }
+ if(val===ans) setTimeout(()=>show("dotaQ"),700)
+ row++
+ document.getElementById("wordInput").value=""
+}
+
+/* DOTA */
+function dq(ok){
+ if(ok) show("monthQ")
+ else alert("Wrong 😄")
+}
+
+/* MONTH CHECK — EDIT */
+const correctMissedMonths=["mar","sep"]
+
+let selectedMonths = new Set()
+
+function toggleMonth(btn,val){
+ if(selectedMonths.has(val)){
+   selectedMonths.delete(val)
+   btn.classList.remove("active")
+ } else {
+   selectedMonths.add(val)
+   btn.classList.add("active")
+ }
+}
+
+function checkMonths(){
+ const chosen=[...selectedMonths].sort()
+ const correct=[...correctMissedMonths].sort()
+
+ if(JSON.stringify(chosen)===JSON.stringify(correct)){
+   show("textQ")
+ } else {
+   alert("Hehe think again 😄")
+ }
+}
+
+
+/* FINAL TEXT */
+function checkFinal(){
+ if(document.getElementById("finalAns").value==3){
+   show("puzzleStage")
+   buildPuzzle()
+ } else alert("Nope 💔")
+}
+
+/* PUZZLE */
+let selected=null
+
+function buildPuzzle(){
+ const p=document.getElementById("puzzle")
+ p.innerHTML=""
+ const order=[0,1,2,3,4,5,6,7,8].sort(()=>Math.random()-.5)
+
+ order.forEach(i=>{
+   const d=document.createElement("div")
+   d.className="piece"
+   d.style.backgroundPosition=`${-(i%3)*120}px ${-Math.floor(i/3)*120}px`
+   d.onclick=()=>swap(d)
+   p.appendChild(d)
+ })
+}
+
+function swap(el){
+ if(!selected){
+   selected=el
+   el.style.outline="3px solid yellow"
+   return
+ }
+ const tmp=el.style.backgroundPosition
+ el.style.backgroundPosition=selected.style.backgroundPosition
+ selected.style.backgroundPosition=tmp
+ selected.style.outline="none"
+ selected=null
+ checkSolved()
+}
+
+function checkSolved(){
+ const pieces=[...document.querySelectorAll(".piece")]
+ const ok=pieces.every((p,i)=>{
+   const parts=p.style.backgroundPosition.split(" ")
+   const x=-parseInt(parts[0])/120
+   const y=-parseInt(parts[1])/120
+   return i===y*3+x
+ })
+ if(ok){
+   document.getElementById("puzzle").style.display="none"
+   document.getElementById("finalImage").style.display="block"
+   startConfetti(140)
+   setTimeout(()=>show("proposal"),1500)
+ }
+}
+
+/* BETTER CONFETTI */
+function startConfetti(count=120){
+ for(let i=0;i<count;i++){
+  const c=document.createElement("div")
+  const type=Math.random()
+
+  if(type<.6){
+    c.className="confetti square"
+    c.style.background=`hsl(${Math.random()*360},80%,60%)`
+  }else if(type<.9){
+    c.className="confetti circle"
+    c.style.background=`hsl(${Math.random()*360},80%,60%)`
+  }else{
+    c.className="confetti heart"
+    c.textContent="💖"
+  }
+
+  c.style.left=Math.random()*100+"vw"
+  c.style.opacity=Math.random()
+  c.style.setProperty("--drift",(Math.random()*200-100)+"px")
+  c.style.animationDuration=(3+Math.random()*2)+"s"
+
+  document.body.appendChild(c)
+  setTimeout(()=>c.remove(),5500)
+ }
+}
+
+/* RUNAWAY NO BUTTON */
+const noBtn=document.getElementById("noBtn")
+noBtn.addEventListener("mouseover",()=>{
+  noBtn.style.position="absolute"
+  noBtn.style.left=Math.random()*80+"vw"
+  noBtn.style.top=Math.random()*70+"vh"
+})
+
+/* YES CLICK → FINAL PAGE */
+function yesWin(){
+ startConfetti(180)
+ show("lovePage")
+}
+</script>
+
+</body>
+</html>
